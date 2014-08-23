@@ -1,0 +1,63 @@
+<span class="angular-calendar">
+    <div class="angular-calendar-header">
+        <div class="header">
+            <i ng-click="changeDate(-1)" class="previous"></i>
+            <span ng-click="toggleGridMode()">{{ headerDisplayDate }}</span>
+            <i ng-click="changeDate(1)" class="next"></i>
+            <div class="clear"></div>
+        </div>
+    </div>
+
+    <div class="angular-calendar-grid">
+        <table cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                    <th>Sun</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr
+                    ng-repeat="week in grid"
+                    class="angular-calendar-row">
+                    <td
+                        ng-repeat="day in week"
+                        ng-class="day.tag"
+                        ng-click="selectDay(day)">
+                        {{ day.dd }}
+                        <i ng-show="day.hasEvents"></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="angular-calendar-events-timescale">
+        <div class="outer">
+        <div class="inner">
+            <div
+                ng-repeat="tick in ticks"
+                class="tick"
+                ng-style="tick.style">
+                <span class="label">{{ tick.label }}</span>
+            </div>
+            <div
+                ng-repeat="displayEvent in displayEvents"
+                class="event"
+                ng-click="selectEvent(displayEvent.event)"
+                ng-style="displayEvent.style">
+                <i
+                    ng-class="displayEvent.event.tag"></i>
+                <span>{{ displayEvent.event.displayTime }}</span>
+                {{ displayEvent.event.title }}<br>
+                <em>{{ displayEvent.event.location }}</em>
+            </div>
+        </div>
+        </div>
+    </div>
+</span>
