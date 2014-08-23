@@ -1,0 +1,25 @@
+{
+  "name": "angular-ios-calendar",
+  "version": "0.0.1",
+  "description": "Calendar similar to the one found in ios7 as an AngularJs directive",
+  "main": "calendar.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bguiz/angular-ios-calendar"
+  },
+  "keywords": [
+    "angularjs",
+    "calendar",
+    "directive",
+    "ios7"
+  ],
+  "author": "bguiz",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/bguiz/angular-ios-calendar/issues"
+  },
+  "homepage": "https://github.com/bguiz/angular-ios-calendar"
+}

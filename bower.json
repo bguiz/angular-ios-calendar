@@ -1,0 +1,12 @@
+{
+    "name": "angular-ios-calendar",
+    "version": "0.0.1",
+    "main": "./calendar.js",
+    "dependencies": {
+    },
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "components"
+    ]
+}
