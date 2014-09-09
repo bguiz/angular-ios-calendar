@@ -1,12 +1,24 @@
 {
     "name": "angular-ios-calendar",
-    "version": "0.0.1",
-    "main": "./calendar.js",
+    "version": "0.0.2",
+    "main": [
+        "./calendar.js",
+        "./calendar.scss",
+        "./calendar.html"
+    ],
+    "authors": [
+        "bguiz"
+    ],
+    "license": "GPLv3",
+    "keywords": [
+        "angular",
+        "calendar",
+        "ios"
+    ],
+    "homepage": "https://github.com/bguiz/angular-ios-calendar",
     "dependencies": {
     },
     "ignore": [
-        "**/.*",
-        "node_modules",
-        "components"
+        "**/.*"
     ]
 }
