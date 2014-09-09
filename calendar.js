@@ -1,13 +1,14 @@
 /*globals console, moment*/
 
-var module = angular.module('bguiz.angular.ioscalendar', []);
+var module = angular.module('angular-ios-calendar', []);
 
 module.directive('angularCalendar', function() {
     'use strict';
+    var firstDayOfWeek = 0; //Sunday
     return {
         restrict: 'E',
         replace: true,
-        templateUrl: '/angular-ios-calendar/calendar.html',
+        templateUrl: 'angular-ios-calendar/calendar.html',
         scope: {
             events: '=',
             selectDate: '&',
@@ -31,28 +32,37 @@ module.directive('angularCalendar', function() {
                 console.log(scope.options.date.format('YYYYMMDD'));
             };
 
+            makeEventsByDay();
+            updateHeader();
+
             scope.$watch('options.date', onDateChange);
             scope.$watch('options.gridMode', onGridModeChange);
             scope.$watchCollection('events', onEventsChange);
-            makeEventsByDay();
-            onDateChange(scope.options.date);
+
+            scope.$watchCollection('grid', function(newVal, oldVal) {
+                console.log('grid', 'new', newVal, 'old', oldVal);
+            });
 
             function onGridModeChange(/*newVal , oldVal*/) {
                 scope.cachedGridStart = null;
                 makeGrid();
             }
 
+            function updateHeader() {
+                scope.headerDisplayDate = scope.options.date.format('DD MMM YYYY');
+            }
+
             function onDateChange(newVal , oldVal) {
                 if (newVal && oldVal) {
-                    //move the today tag
                     updateGridTags();
                 }
-                scope.headerDisplayDate = scope.options.date.format('DD MMM YYYY');
+                updateHeader();
                 makeGrid();
             }
 
             function onEventsChange(/*newVal , oldVal*/) {
                 makeEventsByDay();
+                updateGridEvents();
                 updateGridTags();
             }
 
@@ -62,76 +72,68 @@ module.directive('angularCalendar', function() {
                 var today = moment();
                 var cachedGridStart = scope.cachedGridStart;
                 var grid = [];
+                var dayOfWeek, startOfWeek, week, events, hasEvents, day, tag;
                 if (mode === 'week') {
                     //find first day of this week
-                    var dayOfWeek = date.day();
-                    var startOfWeek = date.clone().add('days', 0 - dayOfWeek);
+                    dayOfWeek = date.day();
+                    startOfWeek = date.clone().add(firstDayOfWeek - dayOfWeek, 'days');
                     if (startOfWeek.isSame(cachedGridStart, 'day')) {
+                        updateGridTags();
                         return;
                     }
                     cachedGridStart = startOfWeek.clone();
-                    var week = [];
+                    week = [];
                     for (var i = 0; i < 7; ++ i) {
-                        var day = startOfWeek.clone().add('days', i);
-                        var tag = '';
-                        if (day.isSame(date, 'day')) {
-                            tag = 'current';
-                        }
-                        else if (day.isSame(today, 'day')) {
-                            tag = 'today';
-                        }
-                        var events = findEventsOnDay(day);
+                        day = startOfWeek.clone().add('days', i);
                         week.push({
+                            moment: day,
                             dd: day.date(),
                             mm: day.month(),
-                            tag: tag,
-                            events: events,
-                            hasEvents: (events.length > 0),
+                            yyyy: day.year(),
                         });
                     }
                     grid.push(week);
                 }
                 else if (mode === 'month') {
-                    var startOfMonth = date.clone().add('days', 1 - date.date());
+                    var startOfMonth = date.clone().add(1 - date.date(), 'days');
                     var month = startOfMonth.month();
-                    var dayOfWeek = startOfMonth.day();
-                    var startOfWeek = startOfMonth.clone().add('days', 0 - dayOfWeek);
+                    var startOfNextMonth = startOfMonth.clone().add(1, 'months');
+                    dayOfWeek = startOfMonth.day();
+                    startOfWeek = startOfMonth.clone().add( firstDayOfWeek - dayOfWeek, 'days');
                     if (startOfWeek.isSame(cachedGridStart, 'day')) {
+                        updateGridTags();
                         return;
                     }
                     cachedGridStart = startOfWeek.clone();
-                    while (startOfWeek.month() <= month) {
-                        var week = [];
+                    while (startOfWeek.isBefore(startOfNextMonth)) {
+                        week = [];
                         for (var i = 0; i < 7; ++i) {
-                            var day = startOfWeek.clone().add('days', i);
-                            var tag = '';
-                            if (day.isSame(date, 'day')) {
-                                tag = 'current';
-                            }
-                            else if (day.isSame(today, 'day')) {
-                                tag = 'today';
-                            }
-                            else if (day.month() < month) {
-                                tag = 'past';
-                            }
-                            else if (day.month() > month) {
-                                tag = 'future';
-                            }
-                            var events = findEventsOnDay(day);
+                            day = startOfWeek.clone().add('days', i);
                             week.push({
+                                moment: day,
                                 dd: day.date(),
                                 mm: day.month(),
-                                tag: tag,
-                                events: events,
-                                hasEvents: (events.length > 0),
+                                yyyy: day.year(),
                             });
                         }
                         grid.push(week);
                         startOfWeek.add('days', 7);
                     }
                 }
+                scope.grid = [];
                 scope.grid = grid;
                 scope.cachedGridStart = cachedGridStart;
+                updateGridEvents();
+                updateGridTags();
+            }
+
+            function updateGridEvents() {
+                scope.grid.forEach(function(week) {
+                    week.forEach(function(day, idx) {
+                        day.events = findEventsOnDay(day.moment);
+                        day.hasEvents = (day.events.length > 0);
+                    });
+                });
             }
 
             function updateGridTags() {
@@ -142,7 +144,7 @@ module.directive('angularCalendar', function() {
                 var ddToday = today.date();
                 var mmToday = today.month();
                 scope.grid.forEach(function(week) {
-                    week.forEach(function(day) {
+                    week.forEach(function(day, idx) {
                         if (day.dd === ddToday && day.mm === mmToday) {
                             day.tag = 'today';
                         }
@@ -156,7 +158,14 @@ module.directive('angularCalendar', function() {
                             day.tag = 'future';
                         }
                         else {
-                            day.tag = null;
+                            day.tag = '';
+                        }
+
+                        if (day.hasEvents) {
+                            day.tag = day.tag + ' has-events';
+                        }
+                        if (idx === 0 || idx === 6) {
+                            day.tag = day.tag + ' weekend';
                         }
                     });
                 });
