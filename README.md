@@ -13,7 +13,7 @@ In your application Javascript, find where you instantiate your AngularJs app,
 and add this package as a dependency:
 
     angular.module('myapp', [
-        'bguiz.angular.ioscalendar' // add this line
+        'angular-ios-calendar' // add this line
     ])
     .config( /* ... */ );
 
